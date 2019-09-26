@@ -5,23 +5,23 @@ using System.Text;
 
 namespace MatrixLibrary
 {
-    public class Vector
+    public class Vector<T>
     {
         private int size;
-        private long[] data;
+        private T[] data;
 
         public Vector(int size)
         {
             this.size = size;
-            this.data = new long[this.size];
+            this.data = new T[this.size];
         }
 
-        public long Get(int i)
+        public T Get(int i)
         {
             return this.data[i];
         }
 
-        public void Set(int i, long value)
+        public void Set(int i, T value)
         {
             this.data[i] = value;
         }
@@ -29,9 +29,9 @@ namespace MatrixLibrary
         public override string ToString()
         {
             StringBuilder stringBuilder = new StringBuilder();
-            foreach (long l in this.data)
+            foreach (T l in this.data)
             {
-                stringBuilder.Append($"{l:10}");
+                stringBuilder.Append($"{l,10}");
             }
             return stringBuilder.ToString();
         }
