@@ -7,8 +7,12 @@ namespace MatrixTest
     {
         static void Main(string[] args)
         {
-            Matrix matrix = new Matrix(3, 3);
-            Console.Out.WriteLine(matrix.Random(30, 100));
+            Matrix matrix1 = new Matrix(3, 3).Random();
+            Matrix matrix2 = new Matrix(3, 3).Random();
+            Console.Out.WriteLine(matrix1);
+            Console.Out.WriteLine(matrix2);
+            Console.Out.WriteLine(matrix1.Add(matrix2));
+            Console.ReadKey();
         }
     }
 }

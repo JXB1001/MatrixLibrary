@@ -1,15 +1,18 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
 namespace MatrixLibrary
 {
-    public class Matrix
+    public class Matrix : IEnumerable, IEquatable<Matrix>
     {
         private int height;
         private int width;
         private int size;
         private double[] data;
+
+        public Matrix(Tuple<int, int> dimensions) : this(dimensions.Item1, dimensions.Item2) { }
 
         public Matrix(int height, int width)
         {
@@ -19,19 +22,148 @@ namespace MatrixLibrary
             this.data = new double[this.size];
         }
 
-        public double Get(int y, int x)
+        public double this[int y, int x]
         {
-            return this.data[y * this.height + x];
+            get => this.data[y * this.height + x];
+            set => this.data[y * this.height + x] = value;
         }
 
-        public void Set(int y, int x, double value)
+        public Matrix this[string y, int x]
         {
-            this.data[y * this.height + x] = value;
+            get
+            {
+                Matrix vector = new Matrix(this.height, 1);
+                for(int i = 0; i < this.height; i++)
+                {
+                    vector[i] = this[i, x];
+                }
+                return vector;
+            }
+
+            set
+            {
+                for (int i = 0; i < this.height; i++)
+                {
+                    this[i, x] = value[i];
+                }
+            }
         }
 
-        public void Set(double[] oldData)
+        public Matrix this[int y, string x]
+        {
+            get
+            {
+                Matrix vector = new Matrix(1, this.width);
+                for (int i = 0; i < this.height; i++)
+                {
+                    vector[i] = this[y, i];
+                }
+                return vector;
+            }
+
+            set
+            {
+                for (int i = 0; i < this.width; i++)
+                {
+                    this[y, i] = value[i];
+                }
+            }
+        }
+
+        public double this[int i]
+        {
+            get
+            {
+                if (this.IsVector())
+                {
+                    return this.data[i];
+                }
+                else
+                    throw new ArgumentException("You can only access values with a single index in a vector");
+
+            }
+
+            set
+            {
+                if (this.IsVector())
+                {
+                    this.data[i] = value;
+                }
+                else
+                    throw new ArgumentException("You can only set values with a single index in a vector");
+            }
+        }
+
+        public bool IsVector()
+        {
+            if ((this.width == 1) || (this.height == 1))
+                return true;
+            else
+                return false;
+        }
+
+        private void Set(double[] oldData)
         {
             Array.Copy(oldData, this.data, this.size);
+        }
+
+        public Matrix Add(Matrix m)
+        {
+            if(!this.Size().Equals(m.Size()))
+            {
+                throw new ArgumentException($"Cannot add matrixes of size {this.Size()} and {m.Size()}");
+            }
+            Matrix result = new Matrix(m.Size());
+            return result.ApplyToAll((y, x) => { return this[y, x] + m[y, x]; });
+        }
+
+        public Matrix Subtract(Matrix m)
+        {
+            if (!this.Size().Equals(m.Size()))
+            {
+                throw new ArgumentException($"Cannot add matrixes of size {this.Size()} and {m.Size()}");
+            }
+            Matrix result = new Matrix(m.Size());
+            return result.ApplyToAll((y, x) => { return this[y, x] - m[y, x]; });
+        }
+
+        public Matrix Multiply(Matrix m)
+        {
+            throw new NotImplementedException();
+            if(this.width != m.height)
+                throw new ArgumentException($"Cannot add matrixes of size {this.Size()} and {m.Size()}");
+            Matrix result = new Matrix(this.height, m.width);
+            IEnumerator horizontal = this.Horizontal().GetEnumerator();
+            IEnumerator vertical = m.Vertical().GetEnumerator();
+        }
+
+        public double Dot(Matrix m)
+        {
+            if(!this.IsVector() || !m.IsVector())
+                throw new ArgumentException("Can only perform this operation on two vectors");
+            if((this.height != m.width)||(this.height != m.width))
+                throw new ArgumentException($"Cannot add matrixes of size {this.Size()} and {m.Size()}");
+
+            double sum = 0;
+            IEnumerator thisE = this.GetEnumerator();
+            IEnumerator mE = m.GetEnumerator();
+            while(thisE.MoveNext() && mE.MoveNext())
+            {
+                sum += ((double)thisE.Current*(double)mE.Current);
+            }
+            return sum;
+        }
+
+        public Matrix Transpose()
+        {
+            Matrix result = new Matrix(this.width, this.height);
+            result = result.ApplyToAll((y, x) => { return this[x, y]; });
+            return result;
+        }
+
+        public Tuple<int, int> Size()
+        {
+            return Tuple.Create<int, int>(this.height, this.width);
         }
 
         public Matrix Copy()
@@ -44,7 +176,7 @@ namespace MatrixLibrary
         public Matrix Identity()
         {
             Matrix matrix = this.Copy();
-            matrix.ApplyToAll((y, x) => {if (y == x) return 1; else return 0;});
+            matrix = matrix.ApplyToAll((y, x) => {if (y == x) return 1; else return 0;});
             return matrix;
         }
 
@@ -71,7 +203,7 @@ namespace MatrixLibrary
             {
                 for (int y = 0; y < this.height; y++)
                 {
-                    matrix.Set(y, x, action());
+                    matrix[y, x] = action();
                 }
             }
             return matrix;
@@ -84,7 +216,7 @@ namespace MatrixLibrary
             {
                 for (int y = 0; y < this.height; y++)
                 {
-                    matrix.Set(y, x, action(Get(y, x)));
+                    matrix[y, x] = action(this[y, x]);
                 }
             }
             return matrix;
@@ -97,7 +229,7 @@ namespace MatrixLibrary
             {
                 for (int y = 0; y < this.height; y++)
                 {
-                    matrix.Set(y, x, action(y, x));
+                    matrix[y, x] = action(y, x);
                 }
             }
             return matrix;
@@ -106,38 +238,43 @@ namespace MatrixLibrary
         public override string ToString()
         {
             StringBuilder stringBuilder = new StringBuilder();
-            foreach (Vector vector in Horizontal())
+            string tempString;
+            foreach (Matrix row in this.Horizontal())
             {
-                stringBuilder.Append(vector.ToString());
+                foreach (double l in row)
+                {
+                    tempString = String.Format("{0:F3}", l);
+                    stringBuilder.Append($"{tempString,-7}");
+                }
                 stringBuilder.Append("\n");
             }
             return stringBuilder.ToString();
         }
 
-        public IEnumerable<Vector> Horizontal()
+        public IEnumerable<Matrix> Horizontal()
         {
-            Vector output = new Vector(this.width);
             for (int y = 0; y < this.height; y++)
             {
-                for (int x = 0; x < this.width; x++)
-                {
-                    output.Set(x, Get(y, x));
-                }
-                yield return output;
+                yield return this[y, ""];
             }
         }
 
-        public IEnumerable<Vector> Vertical()
+        public IEnumerable<Matrix> Vertical()
         {
-            Vector output = new Vector(this.height);
             for (int x = 0; x < this.width; x++)
-            {
-                for (int y = 0; y < this.height; y++)
-                {
-                    output.Set(y, Get(y, x));
-                }
-                yield return output;
+            {      
+                yield return this["",x];
             }
+        }
+
+        public IEnumerator GetEnumerator()
+        {
+            return this.data.GetEnumerator();
+        }
+
+        public bool Equals(Matrix other)
+        {
+            return this.data.Equals(other.data);
         }
     }
 }
