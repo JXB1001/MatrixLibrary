@@ -132,7 +132,7 @@ namespace MatrixLibrary
             if(this.width != m.height)
                 throw new ArgumentException($"Cannot add matrixes of size {this.Size()} and {m.Size()}");
             Matrix result = new Matrix(this.height, m.width);
-            result.ApplyToAll((y, x) => { return this[y, ""].Dot(m["", x]); });
+            result = result.ApplyToAll((y, x) => { return this[y, ""].Dot(m["", x]); });
             return result;
         }
 
@@ -184,6 +184,14 @@ namespace MatrixLibrary
             Matrix matrix = this.Copy();
             Random random = new Random();
             matrix = matrix.ApplyToAll(() => { return random.NextDouble(); });
+            return matrix;
+        }
+
+        public Matrix CountUp()
+        {
+            Matrix matrix = this.Copy();
+            int count = 0;
+            matrix = matrix.ApplyToAll(() => { return (double)++count; });
             return matrix;
         }
 
