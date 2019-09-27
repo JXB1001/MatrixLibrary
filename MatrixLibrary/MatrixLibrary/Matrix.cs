@@ -4,103 +4,109 @@ using System.Text;
 
 namespace MatrixLibrary
 {
-    public class Matrix<T>
+    public class Matrix
     {
         private int height;
         private int width;
         private int size;
-        private T[] data;
+        private double[] data;
 
         public Matrix(int height, int width)
         {
             this.height = height;
             this.width = width;
             this.size = height * width;
-            this.data = new T[this.size];
+            this.data = new double[this.size];
         }
 
-        public T Get(int y, int x)
+        public double Get(int y, int x)
         {
             return this.data[y * this.height + x];
         }
 
-        public void Set(int y, int x, T value)
+        public void Set(int y, int x, double value)
         {
             this.data[y * this.height + x] = value;
         }
 
-        public void Set(T[] oldData)
+        public void Set(double[] oldData)
         {
             Array.Copy(oldData, this.data, this.size);
         }
 
-        public Matrix<T> Copy()
+        public Matrix Copy()
         {
-            Matrix<T> newMatrix = new Matrix<T>(this.height, this.width);
+            Matrix newMatrix = new Matrix(this.height, this.width);
             newMatrix.Set(this.data);
             return newMatrix;
         }
 
-        public Matrix<T> Identity()
+        public Matrix Identity()
         {
-            Matrix<T> matrix = this.Copy();
-            matrix.ApplyToAll((y, x) => {if (y == x) return Calculator<T>.ToType(1); else return Calculator<T>.ToType(0);});
+            Matrix matrix = this.Copy();
+            matrix.ApplyToAll((y, x) => {if (y == x) return 1; else return 0;});
             return matrix;
         }
 
-        public Matrix<T> Random()
+        public Matrix Random()
         {
-            Matrix<T> matrix = this.Copy();
+            Matrix matrix = this.Copy();
             Random random = new Random();
-            matrix.ApplyToAll(() => { return Calculator<T>.ToType(random.NextDouble()); });
+            matrix = matrix.ApplyToAll(() => { return random.NextDouble(); });
             return matrix;
         }
 
-        public Matrix<T> Random(double minimum, double maximum)
+        public Matrix Random(double minimum, double maximum)
         {
-            Matrix<T> matrix = this.Copy();
+            Matrix matrix = this.Copy();
             matrix = matrix.Random();
-            throw new NotImplementedException();
+            matrix = matrix.ApplyToAll((v) => { return v * (maximum - minimum) + minimum; });
             return matrix;
         }
 
-        public void ApplyToAll(Func<T> action)
+        public Matrix ApplyToAll(Func<double> action)
         {
+            Matrix matrix = this.Copy();
             for (int x = 0; x < this.width; x++)
             {
                 for (int y = 0; y < this.height; y++)
                 {
-                    Set(y, x, action());
+                    matrix.Set(y, x, action());
                 }
             }
+            return matrix;
         }
 
-        public void ApplyToAll(Func<T, T> action)
+        public Matrix ApplyToAll(Func<double, double> action)
         {
+            Matrix matrix = this.Copy();
             for (int x = 0; x < this.width; x++)
             {
                 for (int y = 0; y < this.height; y++)
                 {
-                    Set(y, x, action(Get(y, x)));
+                    matrix.Set(y, x, action(Get(y, x)));
                 }
             }
+            return matrix;
         }
 
-        public void ApplyToAll(Func<int, int, T> action)
+        public Matrix ApplyToAll(Func<int, int, double> action)
         {
+            Matrix matrix = this.Copy();
             for (int x = 0; x < this.width; x++)
             {
                 for (int y = 0; y < this.height; y++)
                 {
-                    Set(y, x, action(y, x));
+                    matrix.Set(y, x, action(y, x));
                 }
             }
+            return matrix;
         }
 
         public override string ToString()
         {
             StringBuilder stringBuilder = new StringBuilder();
-            foreach (Vector<T> vector in Horizontal())
+            foreach (Vector vector in Horizontal())
             {
                 stringBuilder.Append(vector.ToString());
                 stringBuilder.Append("\n");
@@ -108,9 +114,9 @@ namespace MatrixLibrary
             return stringBuilder.ToString();
         }
 
-        public IEnumerable<Vector<T>> Horizontal()
+        public IEnumerable<Vector> Horizontal()
         {
-            Vector<T> output = new Vector<T>(this.width);
+            Vector output = new Vector(this.width);
             for (int y = 0; y < this.height; y++)
             {
                 for (int x = 0; x < this.width; x++)
@@ -121,9 +127,9 @@ namespace MatrixLibrary
             }
         }
 
-        public IEnumerable<Vector<T>> Vertical()
+        public IEnumerable<Vector> Vertical()
         {
-            Vector<T> output = new Vector<T>(this.height);
+            Vector output = new Vector(this.height);
             for (int x = 0; x < this.width; x++)
             {
                 for (int y = 0; y < this.height; y++)
