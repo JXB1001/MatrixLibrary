@@ -129,12 +129,11 @@ namespace MatrixLibrary
 
         public Matrix Multiply(Matrix m)
         {
-            throw new NotImplementedException();
             if(this.width != m.height)
                 throw new ArgumentException($"Cannot add matrixes of size {this.Size()} and {m.Size()}");
             Matrix result = new Matrix(this.height, m.width);
-            IEnumerator horizontal = this.Horizontal().GetEnumerator();
-            IEnumerator vertical = m.Vertical().GetEnumerator();
+            result.ApplyToAll((y, x) => { return this[y, ""].Dot(m["", x]); });
+            return result;
         }
 
         public double Dot(Matrix m)

@@ -11,7 +11,7 @@ namespace MatrixTest
             Matrix matrix2 = new Matrix(3, 3).Random();
             Console.Out.WriteLine(matrix1);
             Console.Out.WriteLine(matrix2);
-            Console.Out.WriteLine(matrix1.Add(matrix2));
+            Console.Out.WriteLine(matrix1.Multiply(matrix2));
             Console.ReadKey();
         }
     }
