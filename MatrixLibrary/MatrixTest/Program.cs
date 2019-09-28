@@ -7,12 +7,10 @@ namespace MatrixProgram
     {
         static void Main(string[] args)
         {
-            Matrix matrix1 = new Matrix("2,4,4;1,2,3");
-            Matrix matrix2 = new Matrix(3, 2).CountUp();
-            Console.Out.WriteLine(matrix1);
-            Console.Out.WriteLine(matrix2);
-            Console.Out.WriteLine(matrix1.Multiply(matrix2));
-            Console.ReadKey();
+            Matrix matrix = new Matrix(10, 10).Random(0, 100);
+            matrix = matrix.ApplyToAll((v) => { return Math.Round(v); });
+            Console.Out.WriteLine(matrix);
+            Console.Out.WriteLine(matrix.Determinant());
         }
     }
 }

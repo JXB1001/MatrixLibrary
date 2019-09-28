@@ -1,5 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MatrixLibrary;
+using System.Text;
+using System;
 
 namespace MatrixTests
 {
@@ -37,6 +39,17 @@ namespace MatrixTests
             Matrix matrix = new Matrix("1,0,5;5,-4,-6");
             Assert.IsTrue(matrix.Multiply(2).Compare(new Matrix(
                 "2,0,10;10,-8,-12")));
+        }
+
+        [TestMethod]
+        public void DeterminantTest()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("11,-2,3;");
+            sb.Append("6,-7,8;");
+            sb.Append("11,-12,13");
+            Matrix matrix = new Matrix(sb.ToString());
+            Assert.IsTrue(Math.Abs(matrix.Determinant() - 50) < 0.00001);
         }
     }
 }

@@ -20,7 +20,6 @@ namespace MatrixLibrary
             setMatrixValues(values);
         }
 
-
         private List<string[]> getValues(string intial)
         {
             string[] rows = intial.Split(';');
@@ -151,6 +150,12 @@ namespace MatrixLibrary
                 return false;
         }
 
+        public bool IsSquare()
+        {
+            if (this.height == this.width) return true;
+            else return false;
+        }
+
         private void Set(double[] oldData)
         {
             Array.Copy(oldData, this.data, this.size);
@@ -216,6 +221,29 @@ namespace MatrixLibrary
             return result;
         }
 
+        public double Determinant()
+        {
+            if (!IsSquare())
+                throw new ArgumentException("Cannot find the determinant of non square matrix");
+            if (width < 2)
+                throw new ArgumentException("Cannot find th determinant of a matrix with dimesions less than 2");
+            if (width < 3)
+                return (this[0, 0] * this[1, 1]) - (this[0, 1] * this[1, 0]);
+
+            double sum = 0;
+            double tempValue = 0;
+            Matrix matrix;
+            for (int x = 0; x < this.width; x++)
+            {
+                matrix = this.RemoveRow(0).RemoveColumn(x);
+                tempValue = this[0, x] * matrix.Determinant();
+                tempValue = (x % 2 == 0) ? tempValue : -tempValue;
+                sum += tempValue;
+            }
+
+            return sum;
+        }
+
         public Tuple<int, int> Size()
         {
             return Tuple.Create<int, int>(this.height, this.width);
@@ -226,6 +254,51 @@ namespace MatrixLibrary
             Matrix newMatrix = new Matrix(this.height, this.width);
             newMatrix.Set(this.data);
             return newMatrix;
+        }
+
+        public Matrix GetSubMatrix(int startY, int endY, int startX, int endX)
+        {
+            if ((startY > endY) || (startX > endY))
+                throw new ArgumentException("Invalid arguments to extract the submatrix");
+            Matrix matrix = new Matrix(endY - startY + 1, endX - startX + 1);
+            for (int y = startY; y <= endY; y++)
+            {
+                for (int x = startX; x <= endX; x++)
+                {
+                    matrix[y - startY, x - startX] = this[y, x];
+                }
+            }
+            return matrix;
+        }
+
+        public Matrix RemoveRow(int v)
+        {
+            Matrix matrix = new Matrix(this.height - 1, this.width);
+            int targetIndex = 0;
+            for(int i = 0; i < this.height; i++)
+            {
+                if(i != v)
+                {
+                    targetIndex = (i < v) ? i : i - 1;
+                    matrix[targetIndex, ""] = this[i, ""];
+                }
+            }
+            return matrix;
+        }
+
+        public Matrix RemoveColumn(int v)
+        {
+            Matrix matrix = new Matrix(this.height, this.width-1);
+            int targetIndex = 0;
+            for (int i = 0; i < this.width; i++)
+            {
+                if (i != v)
+                {
+                    targetIndex = (i < v) ? i : i - 1;
+                    matrix["", targetIndex] = this["",i];
+                }
+            }
+            return matrix;
         }
 
         public Matrix Identity()
