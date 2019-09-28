@@ -7,14 +7,63 @@ namespace MatrixLibrary
 {
     public class Matrix : IEnumerable, IEquatable<Matrix>
     {
-        private int height;
+        private int height = 0;
         private int width;
         private int size;
         private double[] data;
 
+        public Matrix(string intial)
+        {
+            List<string[]> values = getValues(intial);
+            Tuple<int, int> dimensions = getDimenstions(values);
+            setMatrixProperties(dimensions.Item1, dimensions.Item2);
+            setMatrixValues(values);
+        }
+
+
+        private List<string[]> getValues(string intial)
+        {
+            string[] rows = intial.Split(';');
+            List<string[]> values = new List<string[]>();
+            foreach (string row in rows)
+            {
+                values.Add(row.Split(','));
+            }
+            return values;
+        }
+
+        private Tuple<int, int> getDimenstions(List<string[]> values)
+        {
+            int width = values[0].Length;
+            foreach(string[] row in values)
+            {
+                if (row.Length != width)
+                    throw new ArgumentException("All rows in the matrix must have the same length");
+            }
+            return Tuple.Create(values.Count, width);
+        }
+
+        private void setMatrixValues(List<string[]> values)
+        {
+            int count = 0;
+            foreach(string[] row in values)
+            {
+                foreach(string stringValue in row)
+                {
+                    if (!Double.TryParse(stringValue, out this.data[count++]))
+                        throw new ArgumentException($"Unable to parse value:{stringValue}");
+                }
+            }
+        }
+
         public Matrix(Tuple<int, int> dimensions) : this(dimensions.Item1, dimensions.Item2) { }
 
         public Matrix(int height, int width)
+        {
+            setMatrixProperties(height, width);
+        }
+
+        private void setMatrixProperties(int height, int width)
         {
             this.height = height;
             this.width = width;
@@ -133,6 +182,13 @@ namespace MatrixLibrary
                 throw new ArgumentException($"Cannot add matrixes of size {this.Size()} and {m.Size()}");
             Matrix result = new Matrix(this.height, m.width);
             result = result.ApplyToAll((y, x) => { return this[y, ""].Dot(m["", x]); });
+            return result;
+        }
+
+        public Matrix Multiply(int scalar)
+        {
+            Matrix result = this.Copy();
+            result = result.ApplyToAll((v) => { return v*scalar; });
             return result;
         }
 

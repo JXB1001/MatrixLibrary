@@ -8,7 +8,7 @@ namespace MatrixTest
         static void Main(string[] args)
         {
 
-            Matrix matrix1 = new Matrix(2, 3).CountUp();
+            Matrix matrix1 = new Matrix("2,4,4;1,2,3;");
             Matrix matrix2 = new Matrix(3, 2).CountUp();
             Console.Out.WriteLine(matrix1);
             Console.Out.WriteLine(matrix2);
