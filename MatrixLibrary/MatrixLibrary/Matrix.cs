@@ -190,7 +190,7 @@ namespace MatrixLibrary
             return result;
         }
 
-        public Matrix Multiply(int scalar)
+        public Matrix Multiply(double scalar)
         {
             Matrix result = this.Copy();
             result = result.ApplyToAll((v) => { return v*scalar; });
@@ -226,7 +226,7 @@ namespace MatrixLibrary
             if (!IsSquare())
                 throw new ArgumentException("Cannot find the determinant of non square matrix");
             if (width < 2)
-                throw new ArgumentException("Cannot find th determinant of a matrix with dimesions less than 2");
+                return this[0, 0];
             if (width < 3)
                 return (this[0, 0] * this[1, 1]) - (this[0, 1] * this[1, 0]);
 
@@ -242,6 +242,39 @@ namespace MatrixLibrary
             }
 
             return sum;
+        }
+
+        public Matrix Inverse()
+        {
+            Matrix matrix = new Matrix(this.Size());
+            double det = this.Determinant();
+            if (det == 0)
+                return matrix;
+            matrix = this.matrixOfMinors();
+            matrix = matrix.matrixOfCofactors();
+            matrix = matrix.Transpose();
+            matrix = matrix.Multiply(1/det);
+            return matrix;
+        }
+
+        private Matrix matrixOfMinors()
+        {
+            if (!IsSquare())
+                throw new ArgumentException("Cannot find the inverse of non square matrix");
+            Matrix matrix = new Matrix(this.Size());
+            matrix = this.ApplyToAll((y, x) =>
+            {
+                return this.RemoveRow(y).RemoveColumn(x).Determinant();
+            });
+            return matrix;
+        }
+
+        private Matrix matrixOfCofactors()
+        {
+            Matrix matrix = Copy();
+            int count = 0;
+            matrix = this.ApplyToAll((y, x, v) => { return ((y+x)%2 == 0) ? v : -v; });
+            return matrix;
         }
 
         public Tuple<int, int> Size()
@@ -366,6 +399,19 @@ namespace MatrixLibrary
                 for (int y = 0; y < this.height; y++)
                 {
                     matrix[y, x] = action(y, x);
+                }
+            }
+            return matrix;
+        }
+
+        public Matrix ApplyToAll(Func<int, int, double, double> action)
+        {
+            Matrix matrix = this.Copy();
+            for (int x = 0; x < this.width; x++)
+            {
+                for (int y = 0; y < this.height; y++)
+                {
+                    matrix[y, x] = action(y, x, this[y,x]);
                 }
             }
             return matrix;

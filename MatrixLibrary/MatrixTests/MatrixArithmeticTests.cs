@@ -51,5 +51,16 @@ namespace MatrixTests
             Matrix matrix = new Matrix(sb.ToString());
             Assert.IsTrue(Math.Abs(matrix.Determinant() - 50) < 0.00001);
         }
+
+        [TestMethod]
+        public void InverseTest()
+        {
+            Matrix matrix = new Matrix("1,2;3,4");
+            Assert.IsTrue(matrix.Inverse().Compare(new Matrix("-2,1;1.5,-0.5")));
+            matrix = new Matrix("-1,2,3;3,2,1;2,2,2");
+            Assert.IsTrue(matrix.Inverse().Compare(
+                new Matrix("-0.5, -0.5, 1; 1, 2, -2.5; -0.5, -1.5, 2")
+                ));
+        }
     }
 }
