@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MatrixLibrary
 {
-    public class Matrix : IEnumerable, IEquatable<Matrix>
+    public class Matrix : IEnumerable
     {
         private int height = 0;
         private int width;
@@ -335,9 +335,25 @@ namespace MatrixLibrary
             return this.data.GetEnumerator();
         }
 
-        public bool Equals(Matrix other)
+        public bool Compare(Matrix matrix)
         {
-            return this.data.Equals(other.data);
+            return Compare(matrix, 0.00001);
+        }
+
+        public bool Compare(Matrix matrix, double precision)
+        {
+            if (!this.Size().Equals(matrix.Size()))
+            {
+                throw new ArgumentException($"Cannot compare matrices of size {this.Size()} and {matrix.Size()}");
+            }
+            IEnumerator thisEnumerator = this.GetEnumerator();
+            IEnumerator matrixEnumerator = matrix.GetEnumerator();
+            while(thisEnumerator.MoveNext() && matrixEnumerator.MoveNext())
+            {
+                if (Math.Abs((double)thisEnumerator.Current - (double)matrixEnumerator.Current) > precision)
+                    return false;
+            }
+            return true;
         }
     }
 }
