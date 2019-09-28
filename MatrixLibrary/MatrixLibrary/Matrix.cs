@@ -24,8 +24,8 @@ namespace MatrixLibrary
 
         public double this[int y, int x]
         {
-            get => this.data[y * this.height + x];
-            set => this.data[y * this.height + x] = value;
+            get => this.data[y*this.width + x];
+            set => this.data[y*this.width + x] = value;
         }
 
         public Matrix this[string y, int x]
@@ -54,7 +54,7 @@ namespace MatrixLibrary
             get
             {
                 Matrix vector = new Matrix(1, this.width);
-                for (int i = 0; i < this.height; i++)
+                for (int i = 0; i < this.width; i++)
                 {
                     vector[i] = this[y, i];
                 }
@@ -206,9 +206,9 @@ namespace MatrixLibrary
         public Matrix ApplyToAll(Func<double> action)
         {
             Matrix matrix = this.Copy();
-            for (int x = 0; x < this.width; x++)
+            for (int y = 0; y < this.height; y++)
             {
-                for (int y = 0; y < this.height; y++)
+                for (int x = 0; x < this.width; x++)
                 {
                     matrix[y, x] = action();
                 }
